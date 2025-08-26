@@ -11,7 +11,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 
 type Product = {
-  product_id: number; // <-- змінили
+  id: number;
   name: string;
   price: string;
   description: string;
@@ -60,12 +60,10 @@ function App() {
 
   // Add to cart
   const addToCart = (product: Product) => {
-    const exist = cart.find((item) => item.product_id === product.product_id);
+    const exist = cart.find((item) => item.id === product.id);
     if (exist) {
       const updatedCart = cart.map((item) =>
-        item.product_id === product.product_id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
       );
       saveCart(updatedCart);
     } else {
@@ -74,17 +72,17 @@ function App() {
   };
 
   // Update quantity
-  const updateQuantity = (product_id: number, quantity: number) => {
+  const updateQuantity = (id: number, quantity: number) => {
     if (quantity < 1) return;
     const updatedCart = cart.map((item) =>
-      item.product_id === product_id ? { ...item, quantity } : item
+      item.id === id ? { ...item, quantity } : item
     );
     saveCart(updatedCart);
   };
 
   // Remove item
-  const removeFromCart = (product_id: number) => {
-    const updatedCart = cart.filter((item) => item.product_id !== product_id);
+  const removeFromCart = (id: number) => {
+    const updatedCart = cart.filter((item) => item.id !== id);
     saveCart(updatedCart);
   };
 
@@ -95,18 +93,17 @@ function App() {
   );
 
   const handlePayment = async () => {
-    // --- Payment simulation ---
     const isPaid = window.confirm(
       `Payment simulation: confirm the payment of ${total.toFixed(2)} PLN`
     );
     if (!isPaid) return alert("Payment failed");
 
-    // --- Order payload ---
+    // Тут формуємо масив для бекенду
     const orderData = {
       customerName,
       deliveryAddress,
       items: cart.map((item) => ({
-        product_id: item.product_id, // <-- змінили ключ
+        product_id: item.id, // <-- тільки тут робимо product_id
         quantity: item.quantity,
         price: parseFloat(item.price),
       })),
@@ -142,7 +139,7 @@ function App() {
         {/* Products */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
-            <Card key={product.product_id} className="rounded-2xl shadow-md">
+            <Card key={product.id} className="rounded-2xl shadow-md">
               <CardContent>
                 <Typography variant="h6">{product.name}</Typography>
                 <Typography variant="h6">Stock: {product.stock}</Typography>
@@ -172,7 +169,7 @@ function App() {
           {cart.length === 0 && <Typography>Your cart is empty</Typography>}
 
           {cart.map((item) => (
-            <Card key={item.product_id} className="mb-2 p-2 rounded-lg">
+            <Card key={item.id} className="mb-2 p-2 rounded-lg">
               <Typography>{item.name}</Typography>
               <Typography>Price: {item.price} PLN</Typography>
               <div className="flex items-center gap-2 mt-1">
@@ -181,13 +178,13 @@ function App() {
                   size="small"
                   value={item.quantity}
                   onChange={(e) =>
-                    updateQuantity(item.product_id, parseInt(e.target.value))
+                    updateQuantity(item.id, parseInt(e.target.value))
                   }
                   inputProps={{ min: 1 }}
                 />
                 <IconButton
                   color="error"
-                  onClick={() => removeFromCart(item.product_id)}
+                  onClick={() => removeFromCart(item.id)}
                 >
                   <DeleteIcon />
                 </IconButton>
