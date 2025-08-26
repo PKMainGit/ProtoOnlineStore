@@ -15,21 +15,21 @@ type Product = {
   name: string;
   price: string;
   description: string;
-	stock: number;
+  stock: number;
 };
 
 type CartItem = Product & { quantity: number };
 
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
   const [products, setProducts] = useState<Product[]>([]);
-	const [cart, setCart] = useState<CartItem[]>([]);
-	const [showOrderForm, setShowOrderForm] = useState(false);
-	const [customerName, setCustomerName] = useState("");
-	const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
 
-  // Завантажуємо продукти
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -45,7 +45,7 @@ function App() {
     fetchProducts();
   }, []);
 
-  // Завантажуємо кошик з localStorage
+  // Load cart from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
@@ -58,7 +58,7 @@ function App() {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  // Додаємо товар до кошика
+  // Add to cart
   const addToCart = (product: Product) => {
     const exist = cart.find((item) => item.id === product.id);
     if (exist) {
@@ -71,35 +71,35 @@ function App() {
     }
   };
 
-  // Змінюємо кількість
+  // Update quantity
   const updateQuantity = (id: number, quantity: number) => {
-    if (quantity < 1) return; // мінімум 1
+    if (quantity < 1) return;
     const updatedCart = cart.map((item) =>
       item.id === id ? { ...item, quantity } : item
     );
     saveCart(updatedCart);
   };
 
-  // Видаляємо товар з кошика
+  // Remove item
   const removeFromCart = (id: number) => {
     const updatedCart = cart.filter((item) => item.id !== id);
     saveCart(updatedCart);
   };
 
-  // Рахуємо суму
+  // Calculate total
   const total = cart.reduce(
     (sum, item) => sum + parseFloat(item.price) * item.quantity,
     0
-	);
-	
-	const handlePayment = async () => {
-    // --- Симуляція оплати ---
-    const isPaid = window.confirm(
-      `Симуляція оплати: підтвердьте оплату ${total.toFixed(2)} грн`
-    );
-    if (!isPaid) return alert("Оплата не пройшла");
+  );
 
-    // --- Формуємо payload ---
+  const handlePayment = async () => {
+    // --- Payment simulation ---
+    const isPaid = window.confirm(
+      `Payment simulation: confirm the payment of ${total.toFixed(2)} PLN`
+    );
+    if (!isPaid) return alert("Payment failed");
+
+    // --- Order payload ---
     const orderData = {
       customerName,
       deliveryAddress,
@@ -117,7 +117,7 @@ function App() {
       });
 
       if (res.status === 201) {
-        alert("Замовлення успішно оформлено!");
+        alert("Order placed successfully!");
         setCart([]);
         localStorage.removeItem("cart");
         setShowOrderForm(false);
@@ -126,53 +126,53 @@ function App() {
       }
     } catch (err) {
       console.error(err);
-      alert("Помилка при створенні замовлення");
+      alert("Error creating order");
     }
   };
 
   return (
     <div className="p-6">
       <Typography variant="h4" className="mb-4">
-        Прото-Магаз
+        Proto Store
       </Typography>
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Продукти */}
+        {/* Products */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
             <Card key={product.id} className="rounded-2xl shadow-md">
               <CardContent>
                 <Typography variant="h6">{product.name}</Typography>
-                <Typography variant="h6">{product.stock}</Typography>
+                <Typography variant="h6">Stock: {product.stock}</Typography>
                 <Typography color="text.secondary">
                   {product.description}
                 </Typography>
-                <Typography>Ціна: {product.price} грн</Typography>
+                <Typography>Price: {product.price} PLN</Typography>
                 <Button
                   variant="contained"
                   color="primary"
                   className="mt-2"
                   onClick={() => addToCart(product)}
                 >
-                  Додати в кошик
+                  Add to Cart
                 </Button>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Кошик */}
+        {/* Cart */}
         <div className="w-full md:w-80 p-4 bg-gray-100 rounded-2xl shadow-lg">
           <Typography variant="h5" className="mb-4">
-            Кошик ({cart.length})
+            Cart ({cart.length})
           </Typography>
 
-          {cart.length === 0 && <Typography>Кошик порожній</Typography>}
+          {cart.length === 0 && <Typography>Your cart is empty</Typography>}
 
           {cart.map((item) => (
             <Card key={item.id} className="mb-2 p-2 rounded-lg">
               <Typography>{item.name}</Typography>
-              <Typography>Ціна: {item.price} грн</Typography>
+              <Typography>Price: {item.price} PLN</Typography>
               <div className="flex items-center gap-2 mt-1">
                 <TextField
                   type="number"
@@ -196,7 +196,7 @@ function App() {
           {cart.length > 0 && (
             <>
               <Typography className="mt-4 font-bold">
-                Разом: {total.toFixed(2)} грн
+                Total: {total.toFixed(2)} PLN
               </Typography>
               <Button
                 variant="contained"
@@ -204,23 +204,23 @@ function App() {
                 className="mt-2"
                 onClick={() => setShowOrderForm(true)}
               >
-                Скласти замовлення
+                Place Order
               </Button>
             </>
           )}
 
           {showOrderForm && (
             <Card className="p-4 mt-4 bg-gray-200 rounded-lg">
-              <Typography variant="h6">Форма замовлення</Typography>
+              <Typography variant="h6">Order Form</Typography>
               <TextField
-                label="Ім'я клієнта"
+                label="Customer Name"
                 fullWidth
                 margin="normal"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
               />
               <TextField
-                label="Адреса доставки"
+                label="Delivery Address"
                 fullWidth
                 margin="normal"
                 value={deliveryAddress}
@@ -233,7 +233,7 @@ function App() {
                 className="mt-2"
                 onClick={handlePayment}
               >
-                Оплатити
+                Pay
               </Button>
             </Card>
           )}
