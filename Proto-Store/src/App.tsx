@@ -20,18 +20,20 @@ type Product = {
 
 type CartItem = Product & { quantity: number };
 
+const API_URL = import.meta.env.VITE_API_URL
+
 function App() {
   const [products, setProducts] = useState<Product[]>([]);
 	const [cart, setCart] = useState<CartItem[]>([]);
 	const [showOrderForm, setShowOrderForm] = useState(false);
 	const [customerName, setCustomerName] = useState("");
-  const [deliveryAddress, setDeliveryAddress] = useState("");
+	const [deliveryAddress, setDeliveryAddress] = useState("");
 
   // Завантажуємо продукти
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/products", {
+        const res = await axios.get(`${API_URL}/api/products`, {
           withCredentials: true,
         });
         setProducts(res.data.products || []);
@@ -110,11 +112,9 @@ function App() {
     };
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/order",
-        orderData,
-        { withCredentials: true }
-      );
+      const res = await axios.post(`${API_URL}/api/order`, orderData, {
+        withCredentials: true,
+      });
 
       if (res.status === 201) {
         alert("Замовлення успішно оформлено!");
